@@ -56,10 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .includes(value)
         ) {
           $(this).show();
-          // console.log($(this).eq(i), 'has been shown');
         } else {
           $(this).hide();
-          // console.log($(this).eq(i), 'has been hidden');
         }
       });
   }
@@ -160,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
   "Payment Info" section
   ***************************************** */
 
+  // show only 'credit card' option initially
   hideSelected('#payment option', 0);
   addSelected('#payment option', 1);
   $('#paypal').hide();
@@ -180,4 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
     }
   });
+
+  /* *****************************************
+  Form validation
+  ***************************************** */
 });
