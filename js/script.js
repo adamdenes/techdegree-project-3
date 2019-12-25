@@ -32,13 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .attr('hidden', true);
   }
   function addSelected(color, index) {
-    return $(color)
+    $(color)
       .eq(index)
       .attr('selected', true);
   }
 
   function removeSelected(color, index) {
-    return $(color)
+    $(color)
       .eq(index)
       .removeAttr('selected', false);
   }
@@ -183,4 +183,54 @@ document.addEventListener('DOMContentLoaded', () => {
   /* *****************************************
   Form validation
   ***************************************** */
+
+  function validateName(name) {
+    const regex = /^\s*$/;
+
+    return regex.test($(name).val())
+      ? $(name)
+          .css('border', '2px solid red')
+          .attr('placeholder', 'Please type in your name')
+      : null;
+  }
+
+  function validateEmail(mail) {
+    // [a-zA-Z0-9] : ensures that the first character is not special character
+    // [a-zA-Z0-9._]+ : can only contain charachters and '.' and '_' at least 1 time
+    // @[a-zA-Z0-9] : can only contain characters after '@', at least 1 character
+    // \.[a-zA-Z0-9]+ : can only contain characters after '.', at least 1 character
+    const regex = /^[a-zA-Z0-9][a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/i;
+
+    if ($(mail).val() === '') {
+      $(mail)
+        .css('border', '2px solid red')
+        .attr('placeholder', 'Please type in your email address');
+    } else if (regex.test($(mail).val())) {
+      $(mail).css('border', '2px solid green');
+    } else {
+      $(mail).css('border', '2px solid red');
+    }
+  }
+
+  function validateActivity(checkbox) {
+    const $h2 = $('<h2>At least one option must be selected!</h2><br>');
+    $('.activities').prepend($h2.css('color', 'red').attr('hidden', true));
+
+    $(checkbox).each(function() {
+      if (!$(this).prop('checked')) {
+        $h2.css('color', 'red').removeAttr('hidden', false);
+      }
+    });
+  }
+
+  // validating the email address real time
+  $('#mail').on('keyup', function() {
+    validateEmail(this);
+  });
+
+  $('button[type="submit"]').on('submit', function() {
+    // add functions to validate them all
+    validateName($('#name'));
+    validateActivity($('.activities input'));
+  });
 });
