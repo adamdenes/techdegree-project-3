@@ -225,17 +225,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function validateActivity(checkbox) {
     const $h2 = $('<h2>At least one option must be selected!</h2>');
     $('.activities').prepend($h2.css('color', 'red').attr('hidden', true));
+    let counter = 0;
 
-    $(checkbox).each(function(i) {
-      if (
-        $(this)
-          .eq(i)
-          .prop('checked')
-      ) {
-        console.log($(this).eq(i));
-        return true;
+    $(checkbox).each(function() {
+      if ($(this).prop('checked')) {
+        counter += $(this).length;
       }
     });
+
+    // if at least 1 tag returns true (greater than or equals 1), than return true
+    if (counter >= 1) {
+      return true;
+    } // else show the alert and return false
+    $h2.show();
     return false;
   }
 
@@ -244,7 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
     validateEmail(this);
   });
 
-  $('button[type="submit"]').on('submit', function() {
+  $('button[type="submit"]').on('submit', function(event) {
+    event.preventDefault();
     // add functions to validate them all
     validateName($('#name'));
     validateActivity($('.activities input'));
