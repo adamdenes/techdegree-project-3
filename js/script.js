@@ -187,11 +187,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function validateName(name) {
     const regex = /^\s*$/;
 
-    return regex.test($(name).val())
-      ? $(name)
-          .css('border', '2px solid red')
-          .attr('placeholder', 'Please type in your name')
-      : null;
+    // return true if the input is not blank
+    if (!regex.test($(name).val())) {
+      $(name).css('border', '2px solid rgb(111, 157, 220)');
+      return true;
+    }
+    $(name)
+      .css('border', '2px solid red')
+      .attr('placeholder', 'Please type in your name');
+    return false;
   }
 
   function validateEmail(mail) {
@@ -201,26 +205,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // \.[a-zA-Z0-9]+ : can only contain characters after '.', at least 1 character
     const regex = /^[a-zA-Z0-9][a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/i;
 
+    // if the input field is empty, ask for compliance
     if ($(mail).val() === '') {
       $(mail)
         .css('border', '2px solid red')
         .attr('placeholder', 'Please type in your email address');
-    } else if (regex.test($(mail).val())) {
-      $(mail).css('border', '2px solid green');
-    } else {
-      $(mail).css('border', '2px solid red');
+      return false;
     }
+    // if the given email is OK, the border will be green
+    if (regex.test($(mail).val())) {
+      $(mail).css('border', '2px solid green');
+      return true;
+    }
+    // otherwise turn it to red
+    $(mail).css('border', '2px solid red');
+    return false;
   }
 
   function validateActivity(checkbox) {
-    const $h2 = $('<h2>At least one option must be selected!</h2><br>');
+    const $h2 = $('<h2>At least one option must be selected!</h2>');
     $('.activities').prepend($h2.css('color', 'red').attr('hidden', true));
 
-    $(checkbox).each(function() {
-      if (!$(this).prop('checked')) {
-        $h2.css('color', 'red').removeAttr('hidden', false);
+    $(checkbox).each(function(i) {
+      if (
+        $(this)
+          .eq(i)
+          .prop('checked')
+      ) {
+        console.log($(this).eq(i));
+        return true;
       }
     });
+    return false;
   }
 
   // validating the email address real time
