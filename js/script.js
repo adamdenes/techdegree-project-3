@@ -81,9 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* *****************************************
   ”T-Shirt Info” section
   ***************************************** */
-
-  hideSelected('#design option', 0);
-  addSelected('#design option', 1);
+  // hide the color menu until theme is selected
+  $('#colors-js-puns').hide();
 
   // update the 'color' field to read "Please select a T-shirt theme"
   const $warning = $('<option>Please select a T-shirt theme</option>');
@@ -94,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // use 'change' event listener on 'design' menu 'select' element
   $('#design').on('change', function(event) {
+    // bring the color menu back upon change
+    $('#colors-js-puns').show();
     // if 'js puns' is selected hide all 'heart js' option in 'color'
     if ($(event.target).val() === 'js puns') {
       handleOptions(event.target, 'js puns', '#color option', 'Puns');
@@ -189,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // return true if the input is not blank
     if (!regex.test($(name).val())) {
-      $(name).css('border', '2px solid rgb(111, 157, 220)');
+      $(name).css('border', '2px solid green');
       return true;
     }
     $(name)
@@ -233,12 +234,53 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // if at least 1 tag returns true (greater than or equals 1), than return true
+    // if at least 1 tag returns true (greater than or equals 1), return true
     if (counter >= 1) {
       return true;
     } // else show the alert and return false
-    $h2.show();
+    $h2.show().fadeOut(3000);
     return false;
+  }
+
+  function validatePayment(paymentType, number, zip, cvv) {
+    const $emptyCardField = $('<h3>Please enter a credit card number.</h3>');
+    const $onlyTenNumbers = $(
+      '<h3>Please enter a number that is between 13 and 16 digits long.</h3>'
+    );
+    $('fieldset')
+      .eq(3)
+      .prepend($emptyCardField.css('color', 'red').attr('hidden', true));
+    $('fieldset')
+      .eq(3)
+      .prepend($onlyTenNumbers.css('color', 'red').attr('hidden', true));
+
+    const regexCard = /^\d{13,16}$/; // 13-16 long number
+    const regexZip = /^\d{5}$/; // exactly 5 characters long number
+    const regexCvv = /^\d{3}$/; // exactly 3 characters long number
+
+    if ($(paymentType).val() === 'credit card') {
+      // and if the inputs of $('#cc-num'); $('#zip'); $('#cvv') are all true after regex validation
+      if (
+        regexCard.test(parseInt($(number).val())) &&
+        regexZip.test(parseInt($(zip).val())) &&
+        regexCvv.test(parseInt($(cvv).val()))
+      ) {
+        // return true and make borders green
+        $('#credit-card input').css('border', '2px solid green');
+        return true;
+      }
+      // if the credit card field is not empty
+      if ($(number).val() === '') {
+        $emptyCardField.show().fadeOut(3000);
+      } else if ($(number).val().length > 0 <= 10) {
+        $onlyTenNumbers.show().fadeOut(3000);
+      }
+      // else, return false and display borders as red
+      $('#credit-card input').css('border', '2px solid red');
+      $('#credit-card input').val('');
+      return false;
+    }
+    return true;
   }
 
   // validating the email address real time
@@ -246,10 +288,33 @@ document.addEventListener('DOMContentLoaded', () => {
     validateEmail(this);
   });
 
-  $('button[type="submit"]').on('submit', function(event) {
+  $('form').on('submit', function(event) {
     event.preventDefault();
-    // add functions to validate them all
-    validateName($('#name'));
-    validateActivity($('.activities input'));
+
+    // check if all the functions return true
+    if (
+      validateName($('#name')) &&
+      validateActivity($('.activities input')) &&
+      validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv'))
+    ) {
+      // if so, show the user that his form has been successfuly validated
+      $('form')
+        .eq(-1)
+        .append(
+          $('<h1>Validation successful!</h1>')
+            .css('color', 'green')
+            .fadeOut(3000)
+        );
+      return true;
+    }
+    // otherwise show that some reuqired fields fail the validation process
+    $('form')
+      .eq(-1)
+      .append(
+        $('<h1>Validation failed!</h1>')
+          .css('color', 'red')
+          .fadeOut(3000)
+      );
+    return false;
   });
 });
