@@ -283,6 +283,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
+  // validating the name input field real time
+  $('#name').on('keyup', function() {
+    validateName(this);
+  });
+
   // validating the email address real time
   $('#mail').on('keyup', function() {
     validateEmail(this);
