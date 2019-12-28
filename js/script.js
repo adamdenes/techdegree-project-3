@@ -311,12 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // check if all the functions return true
     $(arrOfFunc).each(function() {
-      if ($(this) === false) {
-        $(this).focus();
-        event.preventDefault();
-        return false;
-      }
-      return true;
+      if ($(this)) {
+        return;
+      } // else prevent the form from submitting
+      $(this).focus();
+      event.preventDefault();
     });
   });
 });
