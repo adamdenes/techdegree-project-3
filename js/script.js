@@ -93,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // use 'change' event listener on 'design' menu 'select' element
   $('#design').on('change', function(event) {
+    // once theme is selected, hide 'Select theme'
+    hideSelected($('#design option'), 0);
     // bring the color menu back upon change
     $('#colors-js-puns').show();
     // if 'js puns' is selected hide all 'heart js' option in 'color'
@@ -205,20 +207,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // @[a-zA-Z0-9] : can only contain characters after '@', at least 1 character
     // \.[a-zA-Z0-9]+ : can only contain characters after '.', at least 1 character
     const regex = /^[a-zA-Z0-9][a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/i;
+    const $emptyMail = $('<h3>Please type in your email address</h3>');
+    $('fieldset')
+      .eq(0)
+      .prepend($emptyMail.css('color', 'red').attr('hidden', true));
 
-    // if the input field is empty, ask for compliance
-    if ($(mail).val() === '') {
-      $(mail)
-        .css('border', '2px solid red')
-        .attr('placeholder', 'Please type in your email address');
-      return false;
-    }
-    // if the given email is OK, the border will be green
-    if (regex.test($(mail).val())) {
+    if ($(mail).val().length === 0) {
+      $emptyMail.show().fadeOut(3000);
+    } else if (regex.test($(mail).val())) {
       $(mail).css('border', '2px solid green');
       return true;
     }
-    // otherwise turn it to red
     $(mail).css('border', '2px solid red');
     return false;
   }
@@ -243,9 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function validatePayment(paymentType, number, zip, cvv) {
-    const $emptyCardField = $('<h3>Please enter a credit card number.</h3>');
+    const $emptyCardField = $('<h2>Please enter a credit card number.</h>');
     const $onlyTenNumbers = $(
-      '<h3>Please enter a number that is between 13 and 16 digits long.</h3>'
+      '<h2>Please enter a number that is between 13 and 16 digits long.</h2>'
     );
     $('fieldset')
       .eq(3)
@@ -259,6 +258,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const regexCvv = /^\d{3}$/; // exactly 3 characters long number
 
     if ($(paymentType).val() === 'credit card') {
+      // if the credit card field is not empty
+      if ($(number).val().length === 0) {
+        $emptyCardField.show().fadeOut(3000);
+        $('#cc-num').css('border', '2px solid red');
+      } else if ($(number).val().length <= 10) {
+        $('#cc-num').css('border', '2px solid red');
+        $onlyTenNumbers.show().fadeOut(3000);
+      } else {
+        $('#cc-num').css('border', '2px solid green');
+      }
       // and if the inputs of $('#cc-num'); $('#zip'); $('#cvv') are all true after regex validation
       if (
         regexCard.test(parseInt($(number).val())) &&
@@ -268,12 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // return true and make borders green
         $('#credit-card input').css('border', '2px solid green');
         return true;
-      }
-      // if the credit card field is not empty
-      if ($(number).val() === '') {
-        $emptyCardField.show().fadeOut(3000);
-      } else if ($(number).val().length > 0 <= 10) {
-        $onlyTenNumbers.show().fadeOut(3000);
       }
       // else, return false and display borders as red
       $('#credit-card input').css('border', '2px solid red');
@@ -293,33 +296,27 @@ document.addEventListener('DOMContentLoaded', () => {
     validateEmail(this);
   });
 
+  // validating the credit card number real time
+  $('#cc-num').on('keyup', function() {
+    validateEmail(this);
+  });
+
   $('form').on('submit', function(event) {
-    event.preventDefault();
+    const arrOfFunc = [
+      validateName($('#name')),
+      validateEmail($('#mail')),
+      validateActivity($('.activities input')),
+      validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv')),
+    ];
 
     // check if all the functions return true
-    if (
-      validateName($('#name')) &&
-      validateActivity($('.activities input')) &&
-      validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv'))
-    ) {
-      // if so, show the user that his form has been successfuly validated
-      $('form')
-        .eq(-1)
-        .append(
-          $('<h1>Validation successful!</h1>')
-            .css('color', 'green')
-            .fadeOut(3000)
-        );
+    $(arrOfFunc).each(function() {
+      if ($(this) === false) {
+        $(this).focus();
+        event.preventDefault();
+        return false;
+      }
       return true;
-    }
-    // otherwise show that some reuqired fields fail the validation process
-    $('form')
-      .eq(-1)
-      .append(
-        $('<h1>Validation failed!</h1>')
-          .css('color', 'red')
-          .fadeOut(3000)
-      );
-    return false;
+    });
   });
 });
