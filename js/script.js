@@ -189,15 +189,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function validateName(name) {
     const regex = /^\s*$/;
+    const $emptyName = $('<h3>Please type in your name</h3>');
+    $('fieldset')
+      .eq(0)
+      .prepend($emptyName.css('color', 'red').attr('hidden', true));
 
     // return true if the input is not blank
     if (!regex.test($(name).val())) {
       $(name).css('border', '2px solid green');
       return true;
     }
-    $(name)
-      .css('border', '2px solid red')
-      .attr('placeholder', 'Please type in your name');
+    $emptyName.show().fadeOut(3000);
+    $(name).css('border', '2px solid red');
     return false;
   }
 
@@ -301,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     validateEmail(this);
   });
 
-  $('form').on('submit', function(event) {
+  function masterValidator() {
     const arrOfFunc = [
       validateName($('#name')),
       validateEmail($('#mail')),
@@ -309,13 +312,19 @@ document.addEventListener('DOMContentLoaded', () => {
       validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv')),
     ];
 
-    // check if all the functions return true
     $(arrOfFunc).each(function() {
       if ($(this)) {
-        return;
-      } // else prevent the form from submitting
-      $(this).focus();
-      event.preventDefault();
+        console.log(this);
+        return true;
+      }
+      return false;
     });
+  }
+
+  $('form').on('submit', function(event) {
+    if (masterValidator() === true) {
+      return event.target;
+    }
+    event.preventDefault();
   });
 });
