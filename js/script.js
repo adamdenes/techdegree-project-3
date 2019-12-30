@@ -61,6 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
   }
+
+  function removeHTML(field, removeable) {
+    $(field).each(function() {
+      $(this)
+        .hide()
+        .remove($(removeable));
+    });
+  }
   /* *****************************************
   ”Job Role” section
   ***************************************** */
@@ -217,12 +225,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if ($(mail).val().length === 0) {
       $emptyMail.show().fadeOut(3000);
-    } else if (regex.test($(mail).val())) {
+      $(mail).css('border', '2px solid red');
+      return false;
+    }
+    if (regex.test($(mail).val())) {
       $(mail).css('border', '2px solid green');
       return true;
     }
-    $(mail).css('border', '2px solid red');
-    return false;
   }
 
   function validateActivity(checkbox) {
@@ -283,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       // else, return false and display borders as red
       $('#credit-card input').css('border', '2px solid red');
-      $('#credit-card input').val('');
+      // $('#credit-card input').val('');
       return false;
     }
     return true;
@@ -301,30 +310,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // validating the credit card number real time
   $('#cc-num').on('keyup', function() {
-    validateEmail(this);
+    const $emptyCardField = $(
+      '<h2 id="empty">Please enter a credit card number.</h>'
+    );
+    const $onlyTenNumbers = $(
+      '<h2 id="between">Please enter a number that is between 13 and 16 digits long.</h2>'
+    );
+    $('fieldset')
+      .eq(3)
+      .prepend($emptyCardField.css('color', 'red').attr('hidden', true));
+    $('fieldset')
+      .eq(3)
+      .prepend($onlyTenNumbers.css('color', 'red').attr('hidden', true));
+
+    if ($('#cc-num').val().length === 0) {
+      $('#cc-num')
+        .css('border', '2px solid red')
+        .one();
+      $emptyCardField.show();
+    } else if ($('#cc-num').val().length === 10) {
+      $('#cc-num').css('border', '2px solid red');
+      $onlyTenNumbers.show();
+    } else if (
+      $('#cc-num').val().length > 12 &&
+      $('#cc-num').val().length < 17
+    ) {
+      $('#cc-num').css('border', '2px solid green');
+      // remove every extra dynamic warning if input is between 13-16 number
+      removeHTML($('fieldset h2'), $('#empty'));
+      removeHTML($('fieldset h2'), $('#between'));
+      return true;
+    } else {
+      $('#cc-num').css('border', '2px solid red');
+    }
   });
 
-  function masterValidator() {
-    const arrOfFunc = [
-      validateName($('#name')),
-      validateEmail($('#mail')),
-      validateActivity($('.activities input')),
-      validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv')),
-    ];
-
-    $(arrOfFunc).each(function() {
-      if ($(this)) {
-        console.log(this);
-        return true;
-      }
-      return false;
-    });
-  }
-
   $('form').on('submit', function(event) {
-    if (masterValidator() === true) {
-      return event.target;
+    // submit form only if every validation returns true
+    if (!validateName($('#name'))) {
+      event.preventDefault();
     }
-    event.preventDefault();
+    if (!validateEmail($('#mail'))) {
+      event.preventDefault();
+    }
+    if (!validateActivity($('.activities input'))) {
+      event.preventDefault();
+    }
+    if (!validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv'))) {
+      event.preventDefault();
+    }
   });
 });
