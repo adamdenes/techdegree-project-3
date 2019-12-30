@@ -345,8 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function jumpToInvalid(field) {}
-
   $('form').on('submit', function(event) {
     // submit form only if every validation returns true
     // jump to the invalid field
