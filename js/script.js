@@ -345,19 +345,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function jumpToInvalid(field) {}
+
   $('form').on('submit', function(event) {
     // submit form only if every validation returns true
+    // jump to the invalid field
     if (!validateName($('#name'))) {
       event.preventDefault();
+      $('#name').focus();
     }
     if (!validateEmail($('#mail'))) {
       event.preventDefault();
+      $('#mail').focus();
     }
     if (!validateActivity($('.activities input'))) {
       event.preventDefault();
+      $('.activities input').focus();
     }
     if (!validatePayment($('#payment'), $('#cc-num'), $('#zip'), $('#cvv'))) {
       event.preventDefault();
+      $('#payment').focus();
     }
+    // if the form is empty, jump to name field
+    $('#name').focus();
   });
 });
