@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!regex.test($(name).val())) {
       $(name).css('border', '2px solid green');
       return true;
-    }
+    } // else show warning and return false
     $emptyName.show().fadeOut(3000);
     $(name).css('border', '2px solid red');
     return false;
@@ -218,20 +218,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // @[a-zA-Z0-9] : can only contain characters after '@', at least 1 character
     // \.[a-zA-Z0-9]+ : can only contain characters after '.', at least 1 character
     const regex = /^[a-zA-Z0-9][a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/i;
-    const $emptyMail = $('<h3>Please type in your email address</h3>');
+
+    // create warn messages
+    const $emptyMail = $(
+      '<h3 id="empty-mail">Please type in your email address</h3>'
+    );
     $('fieldset')
       .eq(0)
       .prepend($emptyMail.css('color', 'red').attr('hidden', true));
+    const $invalidMail = $(
+      '<h3 id="invalid-mail">Please type in a valid email address</h3>'
+    );
+    $('fieldset')
+      .eq(0)
+      .prepend($invalidMail.css('color', 'red').attr('hidden', true));
 
+    // if the mail input is blacnk return 'emptyMail' warning
     if ($(mail).val().length === 0) {
       $emptyMail.show().fadeOut(3000);
       $(mail).css('border', '2px solid red');
       return false;
     }
+    // if the mail validates via regex, return true
     if (regex.test($(mail).val())) {
       $(mail).css('border', '2px solid green');
       return true;
     }
+    // remove extra warning messages and show 'invalidMail'
+    removeHTML($('fieldset h3'), $('#empty-mail'));
+    $invalidMail.show().fadeOut(3000);
+    $(mail).css('border', '2px solid red');
+    return false;
   }
 
   function validateActivity(checkbox) {
@@ -239,8 +256,10 @@ document.addEventListener('DOMContentLoaded', () => {
     $('.activities').prepend($h2.css('color', 'red').attr('hidden', true));
     let counter = 0;
 
+    // for every checkbox check if they are checked
     $(checkbox).each(function() {
       if ($(this).prop('checked')) {
+        // if checkbox is checked, increment counter
         counter += $(this).length;
       }
     });
@@ -254,16 +273,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function validatePayment(paymentType, number, zip, cvv) {
-    const $emptyCardField = $('<h2>Please enter a credit card number.</h>');
+    // create warn messages
+    const $emptyCardField = $('<h3>Please enter a credit card number.</h3>');
     const $onlyTenNumbers = $(
-      '<h2>Please enter a number that is between 13 and 16 digits long.</h2>'
+      '<h2>Please enter a number that is between 13 and 16 digits long.</h3>'
     );
+    const $invalidZip = $('<h3>Please enter a five digit ZIP code.</h3>');
+    const $invalidCvv = $('<h3>Please enter a three digit CVV.</h3>');
     $('fieldset')
       .eq(3)
       .prepend($emptyCardField.css('color', 'red').attr('hidden', true));
     $('fieldset')
       .eq(3)
       .prepend($onlyTenNumbers.css('color', 'red').attr('hidden', true));
+    $('fieldset')
+      .eq(3)
+      .prepend($invalidZip.css('color', 'red').attr('hidden', true));
+    $('fieldset')
+      .eq(3)
+      .prepend($invalidCvv.css('color', 'red').attr('hidden', true));
 
     const regexCard = /^\d{13,16}$/; // 13-16 long number
     const regexZip = /^\d{5}$/; // exactly 5 characters long number
@@ -289,10 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // return true and make borders green
         $('#credit-card input').css('border', '2px solid green');
         return true;
+      } else if (!regexZip.test(parseInt($(zip).val()))) {
+        $('#zip').css('border', '2px solid red');
+        $invalidZip.show().fadeOut(3000);
+      } else if (!regexCvv.test(parseInt($(cvv).val()))) {
+        $('#cvv').css('border', '2px solid red');
+        $invalidCvv.show().fadeOut(3000);
       }
       // else, return false and display borders as red
       $('#credit-card input').css('border', '2px solid red');
-      // $('#credit-card input').val('');
       return false;
     }
     return true;
@@ -310,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // validating the credit card number real time
   $('#cc-num').on('keyup', function() {
+    // create warn messages
     const $emptyCardField = $(
       '<h2 id="empty">Please enter a credit card number.</h>'
     );
@@ -323,14 +357,14 @@ document.addEventListener('DOMContentLoaded', () => {
       .eq(3)
       .prepend($onlyTenNumbers.css('color', 'red').attr('hidden', true));
 
+    // in case of empty card field show 'emptyCardField' message
     if ($('#cc-num').val().length === 0) {
-      $('#cc-num')
-        .css('border', '2px solid red')
-        .one();
-      $emptyCardField.show();
-    } else if ($('#cc-num').val().length === 10) {
       $('#cc-num').css('border', '2px solid red');
-      $onlyTenNumbers.show();
+      $emptyCardField.show().fadeOut(3000);
+    } else if ($('#cc-num').val().length === 10) {
+      // show 'onlyTenNumbers' message if the input is not long enough just yet
+      $('#cc-num').css('border', '2px solid red');
+      $onlyTenNumbers.show().fadeOut(3000);
     } else if (
       $('#cc-num').val().length > 12 &&
       $('#cc-num').val().length < 17
@@ -365,6 +399,15 @@ document.addEventListener('DOMContentLoaded', () => {
       $('#payment').focus();
     }
     // if the form is empty, jump to name field
-    $('#name').focus();
+    if (
+      $('#name').val() === '' &&
+      $('#mail').val() === '' &&
+      $('.activities input').prop('checked') === false &&
+      $('#cc-num').val() === '' &&
+      $('#zip').val() === '' &&
+      $('#cvv').val() === ''
+    ) {
+      $('#name').focus();
+    }
   });
 });
